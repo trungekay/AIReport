@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -12,17 +11,13 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'AutoIntellect AI - Autonomous Document Synthesis & Research Agent',
   description:
     'Building Autonomous & Intelligent AI Systems: Multi-format document parser (PDF, Word, Excel), Vector RAG comparison, and Tavily Google Search augmentation for executive reports.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }) {
   return (
     <html
       lang="vi"

@@ -7,37 +7,29 @@ import {
   Search,
   Layers,
   Globe,
-  FileCheck,
   ChevronDown,
   ChevronUp,
   Brain,
   AlertTriangle,
   Lightbulb,
 } from 'lucide-react';
-import { AgentExecutionStep, SufficiencyEvaluation } from '@/lib/types';
-
-interface AgentTraceViewerProps {
-  steps: AgentExecutionStep[];
-  evaluation?: SufficiencyEvaluation;
-  isExecuting: boolean;
-}
 
 export default function AgentTraceViewer({
-  steps,
+  steps = [],
   evaluation,
   isExecuting,
-}: AgentTraceViewerProps) {
-  const [expandedStepId, setExpandedStepId] = useState<string | null>(null);
+}) {
+  const [expandedStepId, setExpandedStepId] = useState(null);
 
   if (steps.length === 0 && !isExecuting) {
     return null;
   }
 
-  const toggleExpand = (id: string) => {
+  const toggleExpand = (id) => {
     setExpandedStepId(expandedStepId === id ? null : id);
   };
 
-  const getStepIcon = (title: string, status: AgentExecutionStep['status']) => {
+  const getStepIcon = (title, status) => {
     if (status === 'running') {
       return (
         <div className="w-5 h-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin shrink-0"></div>

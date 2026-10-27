@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSampleDocuments } from '@/lib/sampleData';
-
-
+import { getSampleDocuments } from '@/lib/sampleData.js';
 
 export async function GET() {
   const sampleDocs = getSampleDocuments();

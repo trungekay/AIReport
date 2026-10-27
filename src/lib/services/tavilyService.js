@@ -1,17 +1,4 @@
-import { TavilySearchResponse, TavilySearchResultItem } from '../types';
-
-export interface TavilySearchOptions {
-  apiKey?: string;
-  searchDepth?: 'basic' | 'advanced';
-  maxResults?: number;
-  includeAnswer?: boolean;
-}
-
-export async function searchTavily(
-  query: string,
-  reason: string,
-  options: TavilySearchOptions = {}
-): Promise<TavilySearchResponse> {
+export async function searchTavily(query, reason, options = {}) {
   const apiKey = options.apiKey || process.env.TAVILY_API_KEY || '';
   const maxResults = options.maxResults || 4;
 
@@ -38,14 +25,12 @@ export async function searchTavily(
       }
 
       const data = await response.json();
-      const results: TavilySearchResultItem[] = (data.results || []).map(
-        (item: { title?: string; url?: string; content?: string; score?: number }) => ({
-          title: item.title || 'Kết quả tìm kiếm trực tuyến',
-          url: item.url || '#',
-          content: item.content || '',
-          score: item.score,
-        })
-      );
+      const results = (data.results || []).map((item) => ({
+        title: item.title || 'Kết quả tìm kiếm trực tuyến',
+        url: item.url || '#',
+        content: item.content || '',
+        score: item.score,
+      }));
 
       return {
         query,
@@ -53,20 +38,24 @@ export async function searchTavily(
         results,
         triggeredReason: reason,
       };
-    } catch (err: unknown) {
+    } catch (err) {
       console.warn('Tavily search failed, falling back to contextual research generator:', err);
     }
   }
 
-  // Graceful fallback / simulated real-time research when API key is omitted or quota exceeded
   return generateSimulatedWebResults(query, reason);
 }
 
-function generateSimulatedWebResults(query: string, reason: string): TavilySearchResponse {
-  const qLower = query.toLowerCase();
-  const results: TavilySearchResultItem[] = [];
+function generateSimulatedWebResults(query, reason) {
+  const qLower = (query || '').toLowerCase();
+  const results = [];
 
-  if (qLower.includes('thị trường') || qLower.includes('market') || qLower.includes('tài chính') || qLower.includes('doanh thu')) {
+  if (
+    qLower.includes('thị trường') ||
+    qLower.includes('market') ||
+    qLower.includes('tài chính') ||
+    qLower.includes('doanh thu')
+  ) {
     results.push(
       {
         title: `Báo cáo nghiên cứu thị trường & Xu hướng kinh tế 2024-2025 - Benchmark Ngành`,

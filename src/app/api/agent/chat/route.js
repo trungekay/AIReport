@@ -1,9 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getGeminiClient } from '@/lib/services/geminiService';
+import { NextResponse } from 'next/server';
+import { getGeminiClient } from '@/lib/services/geminiService.js';
 
-
-
-export async function POST(req: NextRequest) {
+export async function POST(req) {
   try {
     const { question, reportContext, apiKey } = await req.json();
 
@@ -37,7 +35,7 @@ Hãy trả lời câu hỏi của người dùng một cách chính xác, ngắn
     return NextResponse.json({
       reply: response.text || 'Không nhận được phản hồi từ AI.',
     });
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Lỗi xử lý';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }

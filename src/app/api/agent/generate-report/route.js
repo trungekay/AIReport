@@ -1,15 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { runAutonomousAgent } from '@/lib/agent/autonomousAgent';
-import { DocumentChunk, DocumentMetadata, ReportGenerationRequest } from '@/lib/types';
-
+import { NextResponse } from 'next/server';
+import { runAutonomousAgent } from '@/lib/agent/autonomousAgent.js';
 
 export const maxDuration = 120; // Allow sufficient time for LLM + Tavily
 
-export async function POST(req: NextRequest) {
+export async function POST(req) {
   try {
     const body = await req.json();
-    const documents = body.documents as Array<{ metadata: DocumentMetadata; chunks: DocumentChunk[] }>;
-    const request = body.request as ReportGenerationRequest;
+    const documents = body.documents;
+    const request = body.request;
 
     if (!documents || documents.length === 0) {
       return NextResponse.json(
@@ -31,7 +29,7 @@ export async function POST(req: NextRequest) {
       success: true,
       report,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
     console.error('Generate report API error:', error);
     return NextResponse.json(

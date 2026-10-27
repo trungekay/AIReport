@@ -3,15 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Key, Globe, Sparkles, Check, ExternalLink, ShieldCheck } from 'lucide-react';
 
-interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (geminiKey: string, tavilyKey: string, modelName: string) => void;
-  initialGeminiKey?: string;
-  initialTavilyKey?: string;
-  initialModel?: string;
-}
-
 export default function SettingsModal({
   isOpen,
   onClose,
@@ -19,7 +10,7 @@ export default function SettingsModal({
   initialGeminiKey = '',
   initialTavilyKey = '',
   initialModel = 'gemini-2.5-flash',
-}: SettingsModalProps) {
+}) {
   const [geminiKey, setGeminiKey] = useState(initialGeminiKey);
   const [tavilyKey, setTavilyKey] = useState(initialTavilyKey);
   const [model, setModel] = useState(initialModel);
@@ -33,7 +24,7 @@ export default function SettingsModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     onSave(geminiKey.trim(), tavilyKey.trim(), model);
     setIsSavedToast(true);

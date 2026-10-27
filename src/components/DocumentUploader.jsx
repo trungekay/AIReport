@@ -12,15 +12,6 @@ import {
   Eye,
   AlertCircle,
 } from 'lucide-react';
-import { DocumentChunk, DocumentMetadata, SupportedFileType } from '@/lib/types';
-
-interface DocumentUploaderProps {
-  documents: Array<{ metadata: DocumentMetadata; chunks: DocumentChunk[] }>;
-  onUploadFiles: (files: FileList | File[]) => void;
-  onRemoveDocument: (docId: string) => void;
-  onClearAll: () => void;
-  isUploading: boolean;
-}
 
 export default function DocumentUploader({
   documents,
@@ -28,15 +19,12 @@ export default function DocumentUploader({
   onRemoveDocument,
   onClearAll,
   isUploading,
-}: DocumentUploaderProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+}) {
+  const fileInputRef = useRef(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [viewingDoc, setViewingDoc] = useState<{
-    metadata: DocumentMetadata;
-    chunks: DocumentChunk[];
-  } | null>(null);
+  const [viewingDoc, setViewingDoc] = useState(null);
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragOver(true);
   };
@@ -45,7 +33,7 @@ export default function DocumentUploader({
     setIsDragOver(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -53,20 +41,20 @@ export default function DocumentUploader({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       onUploadFiles(e.target.files);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  const formatFileSize = (bytes: number): string => {
+  const formatFileSize = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
-  const getDocTypeBadge = (type: SupportedFileType) => {
+  const getDocTypeBadge = (type) => {
     switch (type) {
       case 'pdf':
         return (
@@ -88,6 +76,8 @@ export default function DocumentUploader({
             <FileSpreadsheet className="w-3 h-3" /> EXCEL ({type.toUpperCase()})
           </span>
         );
+      default:
+        return null;
     }
   };
 

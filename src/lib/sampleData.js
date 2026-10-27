@@ -1,7 +1,6 @@
-import { DocumentChunk, DocumentMetadata } from './types';
-import { chunkText } from './parsers/chunker';
+import { chunkText } from './parsers/chunker.js';
 
-export function getSampleDocuments(): { metadata: DocumentMetadata; chunks: DocumentChunk[] }[] {
+export function getSampleDocuments() {
   // 1. PDF Sample: Q1 2024 Financial Overview
   const pdfText = `CÔNG TY CỔ PHẦN CÔNG NGHỆ & THƯƠNG MẠI TECHNOVA
 BÁO CÁO TÀI CHÍNH TỔNG HỢP QUÝ 1 NĂM 2024 (Định dạng PDF gốc)

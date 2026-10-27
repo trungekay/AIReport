@@ -1,24 +1,17 @@
 import * as XLSX from 'xlsx';
-import { DocumentChunk, DocumentMetadata, SupportedFileType } from '../types';
-import { chunkText } from './chunker';
+import { chunkText } from './chunker.js';
 
-export async function parseExcelBuffer(
-  buffer: Buffer,
-  docId: string,
-  fileName: string,
-  fileType: SupportedFileType = 'xlsx'
-): Promise<{ metadata: DocumentMetadata; chunks: DocumentChunk[]; fullText: string }> {
+export async function parseExcelBuffer(buffer, docId, fileName, fileType = 'xlsx') {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheetNames = workbook.SheetNames || [];
-  const chunks: DocumentChunk[] = [];
-  const fullTextParts: string[] = [];
+  const chunks = [];
+  const fullTextParts = [];
 
   for (const sheetName of sheetNames) {
     const worksheet = workbook.Sheets[sheetName];
     if (!worksheet) continue;
 
-    // Convert sheet to json array of rows
-    const rows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, { header: 1 });
+    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     if (!rows || rows.length === 0) continue;
 
     const headers = (rows[0] || []).map((h) => String(h || '').trim());
@@ -28,8 +21,7 @@ export async function parseExcelBuffer(
     sheetText += `Số cột: ${headers.length} | Số dòng: ${dataRows.length}\n`;
     sheetText += `Tiêu đề cột: ${headers.filter(Boolean).join(' | ')}\n\n`;
 
-    // Render table rows in batches
-    const rowBatchLines: string[] = [];
+    const rowBatchLines = [];
     for (let rIdx = 0; rIdx < dataRows.length; rIdx++) {
       const row = dataRows[rIdx];
       if (!row || row.length === 0 || row.every((val) => val === undefined || val === null || val === '')) {
@@ -70,7 +62,7 @@ export async function parseExcelBuffer(
 
   const wordCount = fullText.split(/\s+/).filter(Boolean).length;
 
-  const metadata: DocumentMetadata = {
+  const metadata = {
     id: docId,
     name: fileName,
     size: buffer.length,

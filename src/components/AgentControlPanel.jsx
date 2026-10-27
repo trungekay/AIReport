@@ -12,17 +12,6 @@ import {
   Flame,
 } from 'lucide-react';
 
-interface AgentControlPanelProps {
-  userPrompt: string;
-  setUserPrompt: (val: string) => void;
-  enableWebSearch: boolean;
-  setEnableWebSearch: (val: boolean) => void;
-  onExecuteAgent: () => void;
-  isExecuting: boolean;
-  hasDocuments: boolean;
-  hasApiKeys: boolean;
-}
-
 export default function AgentControlPanel({
   userPrompt,
   setUserPrompt,
@@ -32,7 +21,7 @@ export default function AgentControlPanel({
   isExecuting,
   hasDocuments,
   hasApiKeys,
-}: AgentControlPanelProps) {
+}) {
   const quickPrompts = [
     {
       label: 'So sánh tài chính Q1 vs Q2 & Benchmark',
@@ -98,7 +87,7 @@ export default function AgentControlPanel({
         <label className="text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
           <span>Nội dung yêu cầu hoặc câu hỏi cụ thể:</span>
           <span className="text-[11px] text-slate-500 font-mono">
-            {userPrompt.length} ký tự
+            {(userPrompt || '').length} ký tự
           </span>
         </label>
         <textarea
@@ -149,12 +138,12 @@ export default function AgentControlPanel({
       {/* Launch CTA Button */}
       <button
         type="button"
-        disabled={isExecuting || !hasDocuments || !userPrompt.trim()}
+        disabled={isExecuting || !hasDocuments || !(userPrompt || '').trim()}
         onClick={onExecuteAgent}
         className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 shadow-xl transition-all duration-300 ${
           isExecuting
             ? 'bg-slate-800 text-cyan-400 cursor-not-allowed border border-cyan-500/30'
-            : !hasDocuments || !userPrompt.trim()
+            : !hasDocuments || !(userPrompt || '').trim()
             ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
             : 'bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-cyan-500/25 hover:scale-[1.01] active:scale-[0.99]'
         }`}

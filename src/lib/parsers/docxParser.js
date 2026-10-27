@@ -1,12 +1,7 @@
 import mammoth from 'mammoth';
-import { DocumentChunk, DocumentMetadata } from '../types';
-import { chunkText } from './chunker';
+import { chunkText } from './chunker.js';
 
-export async function parseDocxBuffer(
-  buffer: Buffer,
-  docId: string,
-  fileName: string
-): Promise<{ metadata: DocumentMetadata; chunks: DocumentChunk[]; fullText: string }> {
+export async function parseDocxBuffer(buffer, docId, fileName) {
   const result = await mammoth.extractRawText({ buffer });
   const fullText = result.value || '';
 
@@ -26,7 +21,7 @@ export async function parseDocxBuffer(
 
   const wordCount = fullText.split(/\s+/).filter(Boolean).length;
 
-  const metadata: DocumentMetadata = {
+  const metadata = {
     id: docId,
     name: fileName,
     size: buffer.length,

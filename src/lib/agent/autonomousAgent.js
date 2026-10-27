@@ -1,36 +1,17 @@
-import {
-  AgentExecutionStep,
-  DocumentChunk,
-  DocumentMetadata,
-  GeneratedReport,
-  RagSearchResult,
-  ReportGenerationRequest,
-  TavilySearchResponse,
-  TavilySearchResultItem,
-} from '../types';
-import { InMemoryVectorStore } from '../rag/vectorStore';
+import { InMemoryVectorStore } from '../rag/vectorStore.js';
 import {
   decomposeUserGoal,
   evaluateSufficiency,
   generateSynthesizedReport,
-} from '../services/geminiService';
-import { searchTavily } from '../services/tavilyService';
+} from '../services/geminiService.js';
+import { searchTavily } from '../services/tavilyService.js';
 
-export async function runAutonomousAgent(
-  documents: { metadata: DocumentMetadata; chunks: DocumentChunk[] }[],
-  request: ReportGenerationRequest,
-  onStepProgress?: (step: AgentExecutionStep) => void
-): Promise<GeneratedReport> {
-  const steps: AgentExecutionStep[] = [];
+export async function runAutonomousAgent(documents, request, onStepProgress) {
+  const steps = [];
   let currentStepNumber = 1;
 
-  function pushStep(
-    title: string,
-    description: string,
-    status: AgentExecutionStep['status'],
-    details?: AgentExecutionStep['details']
-  ): AgentExecutionStep {
-    const step: AgentExecutionStep = {
+  function pushStep(title, description, status, details) {
+    const step = {
       id: `step-${currentStepNumber}`,
       stepNumber: currentStepNumber++,
       title,
@@ -47,11 +28,11 @@ export async function runAutonomousAgent(
   }
 
   // --- STEP 1: Ingestion & Vector Store Initialization ---
-  const allChunks: DocumentChunk[] = [];
-  const docNames: string[] = [];
+  const allChunks = [];
+  const docNames = [];
 
-  for (const doc of documents) {
-    allChunks.push(...doc.chunks);
+  for (const doc of documents || []) {
+    allChunks.push(...(doc.chunks || []));
     docNames.push(`${doc.metadata.name} (${doc.metadata.type.toUpperCase()})`);
   }
 
@@ -94,7 +75,7 @@ export async function runAutonomousAgent(
     'running'
   );
 
-  const retrievedMap = new Map<string, RagSearchResult>();
+  const retrievedMap = new Map();
   for (const subQ of subQueries) {
     const matched = vectorStore.search(subQ, undefined, 4);
     for (const res of matched) {
@@ -138,7 +119,7 @@ export async function runAutonomousAgent(
 
   const needsWebSearch =
     request.enableWebSearch !== false &&
-    (!evaluation.isSufficient || evaluation.confidenceScore < 80 || evaluation.suggestedSearchQueries.length > 0);
+    (!evaluation.isSufficient || evaluation.confidenceScore < 80 || (evaluation.suggestedSearchQueries || []).length > 0);
 
   steps[steps.length - 1].status = 'completed';
   steps[steps.length - 1].details = {
@@ -151,12 +132,12 @@ export async function runAutonomousAgent(
   if (onStepProgress) onStepProgress(steps[steps.length - 1]);
 
   // --- STEP 5: Autonomous Web Search (Tavily API) ---
-  const webSourcesUsed: TavilySearchResultItem[] = [];
+  const webSourcesUsed = [];
   let webContextText = '';
 
   if (needsWebSearch) {
     const searchQueriesToRun =
-      evaluation.suggestedSearchQueries.length > 0
+      (evaluation.suggestedSearchQueries || []).length > 0
         ? evaluation.suggestedSearchQueries.slice(0, 2)
         : [request.userPrompt];
 
@@ -169,11 +150,11 @@ export async function runAutonomousAgent(
       { searchQueries: searchQueriesToRun }
     );
 
-    const searchResponses: TavilySearchResponse[] = [];
+    const searchResponses = [];
     for (const q of searchQueriesToRun) {
       const res = await searchTavily(
         q,
-        `Bổ sung lỗ hổng thông tin: ${evaluation.missingGaps.join(', ')}`,
+        `Bổ sung lỗ hổng thông tin: ${(evaluation.missingGaps || []).join(', ')}`,
         { apiKey: request.tavilyApiKey, maxResults: 3 }
       );
       searchResponses.push(res);

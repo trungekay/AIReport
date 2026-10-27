@@ -7,36 +7,27 @@ import DocumentUploader from '@/components/DocumentUploader';
 import AgentControlPanel from '@/components/AgentControlPanel';
 import AgentTraceViewer from '@/components/AgentTraceViewer';
 import ReportViewer from '@/components/ReportViewer';
-import {
-  AgentExecutionStep,
-  DocumentChunk,
-  DocumentMetadata,
-  GeneratedReport,
-  SufficiencyEvaluation,
-} from '@/lib/types';
-import { Sparkles, FileText, Bot, ArrowDown, CheckCircle2 } from 'lucide-react';
+import { Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function Home() {
-  const [documents, setDocuments] = useState<
-    Array<{ metadata: DocumentMetadata; chunks: DocumentChunk[] }>
-  >([]);
-  const [userPrompt, setUserPrompt] = useState<string>(
+  const [documents, setDocuments] = useState([]);
+  const [userPrompt, setUserPrompt] = useState(
     'So sánh toàn diện kết quả tài chính giữa các quý (PDF Q1 vs Excel Q2), đối chiếu với các mục tiêu chiến lược trong tệp Word, và benchmark so với xu hướng tăng trưởng bình quân toàn ngành năm 2024-2025.'
   );
-  const [enableWebSearch, setEnableWebSearch] = useState<boolean>(true);
-  const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [isExecuting, setIsExecuting] = useState<boolean>(false);
-  const [isLoadingSample, setIsLoadingSample] = useState<boolean>(false);
-  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const [enableWebSearch, setEnableWebSearch] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [isLoadingSample, setIsLoadingSample] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const [geminiApiKey, setGeminiApiKey] = useState<string>('');
-  const [tavilyApiKey, setTavilyApiKey] = useState<string>('');
-  const [modelName, setModelName] = useState<string>('gemini-2.5-flash');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [tavilyApiKey, setTavilyApiKey] = useState('');
+  const [modelName, setModelName] = useState('gemini-2.5-flash');
 
-  const [generatedReport, setGeneratedReport] = useState<GeneratedReport | null>(null);
-  const [liveSteps, setLiveSteps] = useState<AgentExecutionStep[]>([]);
-  const [liveEvaluation, setLiveEvaluation] = useState<SufficiencyEvaluation | undefined>(undefined);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [generatedReport, setGeneratedReport] = useState(null);
+  const [liveSteps, setLiveSteps] = useState([]);
+  const [liveEvaluation, setLiveEvaluation] = useState(undefined);
+  const [notification, setNotification] = useState(null);
 
   // Load API keys from localStorage on mount
   useEffect(() => {
@@ -52,7 +43,7 @@ export default function Home() {
     }
   }, []);
 
-  const saveSettings = (geminiKey: string, tavilyKey: string, model: string) => {
+  const saveSettings = (geminiKey, tavilyKey, model) => {
     setGeminiApiKey(geminiKey);
     setTavilyApiKey(tavilyKey);
     setModelName(model);
@@ -66,13 +57,13 @@ export default function Home() {
     showNotification('success', 'Đã lưu cấu hình API Keys thành công.');
   };
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
+  const showNotification = (type, message) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 4000);
   };
 
   // Upload custom files
-  const handleUploadFiles = async (files: FileList | File[]) => {
+  const handleUploadFiles = async (files) => {
     if (!files || files.length === 0) return;
     setIsUploading(true);
 
@@ -94,7 +85,7 @@ export default function Home() {
         setDocuments((prev) => [...prev, ...data.documents]);
         showNotification('success', `Đã bóc tách thành công ${data.documents.length} tệp tài liệu.`);
       }
-    } catch (err: unknown) {
+    } catch (err) {
       const msg = err instanceof Error ? err.message : 'Lỗi kết nối';
       showNotification('error', `Lỗi tải tệp: ${msg}`);
     } finally {
@@ -122,7 +113,7 @@ export default function Home() {
     }
   };
 
-  const handleRemoveDocument = (docId: string) => {
+  const handleRemoveDocument = (docId) => {
     setDocuments((prev) => prev.filter((d) => d.metadata.id !== docId));
   };
 
@@ -141,7 +132,6 @@ export default function Home() {
     setGeneratedReport(null);
     setLiveEvaluation(undefined);
 
-    // Initial visual step
     setLiveSteps([
       {
         id: 'step-1',
@@ -177,20 +167,19 @@ export default function Home() {
         return;
       }
 
-      const report: GeneratedReport = data.report;
+      const report = data.report;
       setGeneratedReport(report);
       setLiveSteps(report.executionTrace);
       setLiveEvaluation(report.evaluation);
       showNotification('success', 'Bản báo cáo tổng hợp thông minh đã được khởi tạo hoàn tất!');
 
-      // Smooth scroll to report
       setTimeout(() => {
         const reportElement = document.getElementById('report-section');
         if (reportElement) {
           reportElement.scrollIntoView({ behavior: 'smooth' });
         }
       }, 300);
-    } catch (err: unknown) {
+    } catch (err) {
       const msg = err instanceof Error ? err.message : 'Lỗi kết nối';
       showNotification('error', `Lỗi xử lý: ${msg}`);
     } finally {

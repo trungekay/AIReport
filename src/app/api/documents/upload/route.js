@@ -1,12 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { parseDocument } from '@/lib/parsers/documentParser';
+import { NextResponse } from 'next/server';
+import { parseDocument } from '@/lib/parsers/documentParser.js';
 
-
-
-export async function POST(req: NextRequest) {
+export async function POST(req) {
   try {
     const formData = await req.formData();
-    const files = formData.getAll('files') as File[];
+    const files = formData.getAll('files');
 
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -28,7 +26,7 @@ export async function POST(req: NextRequest) {
           chunks: parsed.chunks,
           previewSnippet: parsed.fullText.slice(0, 300) + (parsed.fullText.length > 300 ? '...' : ''),
         });
-      } catch (parseErr: unknown) {
+      } catch (parseErr) {
         const errorMessage = parseErr instanceof Error ? parseErr.message : 'Lỗi không xác định khi đọc tệp';
         console.error(`Error parsing file ${file.name}:`, parseErr);
         return NextResponse.json(
@@ -43,7 +41,7 @@ export async function POST(req: NextRequest) {
       message: `Đã phân tích thành công ${parsedDocs.length} tài liệu.`,
       documents: parsedDocs,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Lỗi máy chủ';
     console.error('Upload handler error:', error);
     return NextResponse.json(

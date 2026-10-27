@@ -1,20 +1,18 @@
-import { DocumentChunk, RagSearchResult } from '../types';
-
 export class InvertedIndex {
-  private docFrequencies: Map<string, number> = new Map();
-  private totalDocs = 0;
+  constructor() {
+    this.docFrequencies = new Map();
+    this.totalDocs = 0;
+  }
 
-  constructor() {}
-
-  private tokenize(text: string): string[] {
-    return text
+  tokenize(text) {
+    return (text || '')
       .toLowerCase()
       .replace(/[^\p{L}\p{N}\s%$.-]/gu, ' ')
       .split(/\s+/)
       .filter((term) => term.length > 1);
   }
 
-  public indexChunks(chunks: DocumentChunk[]): void {
+  indexChunks(chunks) {
     this.totalDocs = chunks.length;
     this.docFrequencies.clear();
 
@@ -26,11 +24,11 @@ export class InvertedIndex {
     }
   }
 
-  public scoreChunk(queryTerms: string[], chunkContent: string): number {
+  scoreChunk(queryTerms, chunkContent) {
     const tokens = this.tokenize(chunkContent);
     if (tokens.length === 0) return 0;
 
-    const termCounts: Record<string, number> = {};
+    const termCounts = {};
     for (const token of tokens) {
       termCounts[token] = (termCounts[token] || 0) + 1;
     }
@@ -49,8 +47,8 @@ export class InvertedIndex {
   }
 }
 
-export function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  if (vecA.length !== vecB.length || vecA.length === 0) return 0;
+export function cosineSimilarity(vecA, vecB) {
+  if (!vecA || !vecB || vecA.length !== vecB.length || vecA.length === 0) return 0;
   let dotProduct = 0;
   let normA = 0;
   let normB = 0;
@@ -66,48 +64,42 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 }
 
 export class InMemoryVectorStore {
-  private chunks: DocumentChunk[] = [];
-  private invertedIndex: InvertedIndex = new InvertedIndex();
-
-  constructor() {}
-
-  public setChunks(chunks: DocumentChunk[]): void {
-    this.chunks = chunks;
-    this.invertedIndex.indexChunks(chunks);
-  }
-
-  public addChunks(newChunks: DocumentChunk[]): void {
-    this.chunks.push(...newChunks);
-    this.invertedIndex.indexChunks(this.chunks);
-  }
-
-  public clear(): void {
+  constructor() {
     this.chunks = [];
     this.invertedIndex = new InvertedIndex();
   }
 
-  public getAllChunks(): DocumentChunk[] {
+  setChunks(chunks) {
+    this.chunks = chunks || [];
+    this.invertedIndex.indexChunks(this.chunks);
+  }
+
+  addChunks(newChunks) {
+    this.chunks.push(...(newChunks || []));
+    this.invertedIndex.indexChunks(this.chunks);
+  }
+
+  clear() {
+    this.chunks = [];
+    this.invertedIndex = new InvertedIndex();
+  }
+
+  getAllChunks() {
     return this.chunks;
   }
 
-  public search(
-    query: string,
-    queryEmbedding?: number[],
-    topK = 6
-  ): RagSearchResult[] {
-    if (this.chunks.length === 0) return [];
+  search(query, queryEmbedding, topK = 6) {
+    if (!this.chunks || this.chunks.length === 0) return [];
 
-    const queryTerms = query
+    const queryTerms = (query || '')
       .toLowerCase()
       .replace(/[^\p{L}\p{N}\s%$.-]/gu, ' ')
       .split(/\s+/)
       .filter((term) => term.length > 1);
 
-    const scoredResults: RagSearchResult[] = [];
-
-    // Calculate raw scores
-    const keywordScores: number[] = [];
-    const vectorScores: number[] = [];
+    const scoredResults = [];
+    const keywordScores = [];
+    const vectorScores = [];
 
     for (const chunk of this.chunks) {
       const kwScore = this.invertedIndex.scoreChunk(queryTerms, chunk.content);
@@ -128,13 +120,11 @@ export class InMemoryVectorStore {
       const normKw = keywordScores[i] / maxKw;
       const normVec = queryEmbedding ? vectorScores[i] / maxVec : 0;
 
-      // Hybrid fusion: semantic weight + keyword weight
       const hybridScore = queryEmbedding
         ? 0.65 * normVec + 0.35 * normKw
         : normKw;
 
-      // Check phrase boost
-      const hasExactPhrase = chunk.content.toLowerCase().includes(query.toLowerCase().trim());
+      const hasExactPhrase = (chunk.content || '').toLowerCase().includes((query || '').toLowerCase().trim());
       const finalScore = Math.min(1, hybridScore + (hasExactPhrase ? 0.2 : 0));
 
       if (finalScore > 0.03 || this.chunks.length <= topK) {

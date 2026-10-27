@@ -1,15 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Cpu, Sparkles, Key, FileSpreadsheet, FileText, Database } from 'lucide-react';
-
-interface HeaderProps {
-  onOpenSettings: () => void;
-  onLoadSampleData: () => void;
-  isLoadingSample: boolean;
-  hasApiKeys: boolean;
-  docCount: number;
-}
+import { Cpu, Sparkles, Key, Database } from 'lucide-react';
 
 export default function Header({
   onOpenSettings,
@@ -17,7 +9,7 @@ export default function Header({
   isLoadingSample,
   hasApiKeys,
   docCount,
-}: HeaderProps) {
+}) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-4 lg:px-8 py-3.5">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -1,10 +1,9 @@
-import { DocumentChunk, DocumentMetadata, SupportedFileType } from '../types';
-import { parsePdfBuffer } from './pdfParser';
-import { parseDocxBuffer } from './docxParser';
-import { parseExcelBuffer } from './excelParser';
+import { parsePdfBuffer } from './pdfParser.js';
+import { parseDocxBuffer } from './docxParser.js';
+import { parseExcelBuffer } from './excelParser.js';
 
-export function detectFileType(fileName: string): SupportedFileType | null {
-  const ext = fileName.toLowerCase().split('.').pop() || '';
+export function detectFileType(fileName) {
+  const ext = (fileName || '').toLowerCase().split('.').pop() || '';
   if (ext === 'pdf') return 'pdf';
   if (ext === 'docx') return 'docx';
   if (ext === 'xlsx') return 'xlsx';
@@ -14,10 +13,10 @@ export function detectFileType(fileName: string): SupportedFileType | null {
 }
 
 export async function parseDocument(
-  buffer: Buffer,
-  fileName: string,
-  docId: string = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
-): Promise<{ metadata: DocumentMetadata; chunks: DocumentChunk[]; fullText: string }> {
+  buffer,
+  fileName,
+  docId = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+) {
   const fileType = detectFileType(fileName);
   if (!fileType) {
     throw new Error(

@@ -1,22 +1,12 @@
 import { GoogleGenAI } from '@google/genai';
-import { SufficiencyEvaluation } from '../types';
 
-export interface GeminiConfig {
-  apiKey?: string;
-  modelName?: string;
-}
-
-export function getGeminiClient(apiKey?: string): GoogleGenAI | null {
+export function getGeminiClient(apiKey) {
   const key = apiKey || process.env.GEMINI_API_KEY;
   if (!key || key.trim().length === 0) return null;
   return new GoogleGenAI({ apiKey: key.trim() });
 }
 
-export async function decomposeUserGoal(
-  userPrompt: string,
-  docNames: string[],
-  config: GeminiConfig = {}
-): Promise<{ subQueries: string[]; analysisPlan: string }> {
+export async function decomposeUserGoal(userPrompt, docNames, config = {}) {
   const client = getGeminiClient(config.apiKey);
   const fallbackPlan = {
     subQueries: [
@@ -25,13 +15,13 @@ export async function decomposeUserGoal(
       'So sánh điểm khác biệt và đối chiếu dữ liệu giữa các tệp báo cáo',
       'Bối cảnh thị trường ngành, đối thủ cạnh tranh và xu hướng hiện tại',
     ],
-    analysisPlan: `Kế hoạch phân tích tự động: Trích xuất các chỉ số cốt lõi từ ${docNames.join(', ')}, đối chiếu chéo số liệu và bổ sung thông tin thị trường liên quan.`,
+    analysisPlan: `Kế hoạch phân tích tự động: Trích xuất các chỉ số cốt lõi từ ${(docNames || []).join(', ')}, đối chiếu chéo số liệu và bổ sung thông tin thị trường liên quan.`,
   };
 
   if (!client) return fallbackPlan;
 
   const prompt = `Bạn là AI Agent chuyên gia phân tích dữ liệu và báo cáo tự động (Autonomous Intelligence System).
-Nhiệm vụ: Phân rã mục tiêu yêu cầu của người dùng để thực hiện tìm kiếm RAG trên các tệp tài liệu: ${docNames.join(', ')}.
+Nhiệm vụ: Phân rã mục tiêu yêu cầu của người dùng để thực hiện tìm kiếm RAG trên các tệp tài liệu: ${(docNames || []).join(', ')}.
 
 Yêu cầu người dùng:
 "${userPrompt}"
@@ -63,14 +53,10 @@ Chỉ trả về JSON hợp lệ, không bọc markdown thừa.`;
   }
 }
 
-export async function evaluateSufficiency(
-  userPrompt: string,
-  retrievedChunksText: string,
-  config: GeminiConfig = {}
-): Promise<SufficiencyEvaluation> {
+export async function evaluateSufficiency(userPrompt, retrievedChunksText, config = {}) {
   const client = getGeminiClient(config.apiKey);
 
-  const fallbackEvaluation: SufficiencyEvaluation = {
+  const fallbackEvaluation = {
     isSufficient: false,
     confidenceScore: 68,
     reasoning:
@@ -95,7 +81,7 @@ Yêu cầu người dùng:
 
 Thông tin trích xuất từ tài liệu (RAG Chunks):
 """
-${retrievedChunksText.slice(0, 4000)}
+${(retrievedChunksText || '').slice(0, 4000)}
 """
 
 Quy tắc quyết định:
@@ -135,22 +121,17 @@ Trả về duy nhất JSON hợp lệ theo mẫu:
 }
 
 export async function generateSynthesizedReport(
-  userPrompt: string,
-  ragContext: string,
-  webContext: string,
-  evaluation: SufficiencyEvaluation,
-  docNames: string[],
-  config: GeminiConfig = {}
-): Promise<{
-  markdownContent: string;
-  executiveSummary: string;
-  keyFindings: string[];
-  strategicRecommendations: string[];
-}> {
+  userPrompt,
+  ragContext,
+  webContext,
+  evaluation,
+  docNames,
+  config = {}
+) {
   const client = getGeminiClient(config.apiKey);
 
   if (!client) {
-    return generateFallbackOfflineReport(userPrompt, docNames, evaluation, webContext.length > 0);
+    return generateFallbackOfflineReport(userPrompt, docNames, evaluation, (webContext || '').length > 0);
   }
 
   const prompt = `Bạn là hệ thống AI Tự Hành Cấp Cao (Autonomous & Intelligent AI System) chuyên gia thẩm định và tạo báo cáo tổng hợp thông minh.
@@ -160,21 +141,21 @@ Yêu cầu cụ thể của người dùng:
 "${userPrompt}"
 
 Các tệp tài liệu đã phân tích:
-${docNames.map((d) => `- ${d}`).join('\n')}
+${(docNames || []).map((d) => `- ${d}`).join('\n')}
 
 Dữ liệu nội bộ từ các tài liệu (RAG Context):
 """
-${ragContext.slice(0, 9000)}
+${(ragContext || '').slice(0, 9000)}
 """
 
 Dữ liệu tìm kiếm bổ sung từ Web (Tavily/Google Search Context):
 """
-${webContext.slice(0, 4500)}
+${(webContext || '').slice(0, 4500)}
 """
 
 Đánh giá tính đầy đủ dữ liệu:
-- Độ tin cậy dữ liệu nội bộ: ${evaluation.confidenceScore}%
-- Lỗ hổng đã được bổ sung bằng tìm kiếm trực tuyến: ${evaluation.missingGaps.join(', ')}
+- Độ tin cậy dữ liệu nội bộ: ${evaluation?.confidenceScore || 70}%
+- Lỗ hổng đã được bổ sung bằng tìm kiếm trực tuyến: ${(evaluation?.missingGaps || []).join(', ')}
 
 HƯỚNG DẪN VIẾT BÁO CÁO (Định dạng Markdown chuyên nghiệp):
 1. Tiêu đề báo cáo nổi bật, ngày lập báo cáo, trạng thái xác thực.
@@ -214,17 +195,17 @@ Hãy sử dụng văn phong quản trị cấp cao, sắc sảo, khách quan và
     };
   } catch (err) {
     console.warn('Gemini report generation error, falling back:', err);
-    return generateFallbackOfflineReport(userPrompt, docNames, evaluation, webContext.length > 0);
+    return generateFallbackOfflineReport(userPrompt, docNames, evaluation, (webContext || '').length > 0);
   }
 }
 
-function extractSection(markdown: string, headerKeyword: string): string | null {
+function extractSection(markdown, headerKeyword) {
   const regex = new RegExp(`#{1,3}\\s*[^\\n]*${headerKeyword}[^\\n]*\\n([\\s\\S]*?)(?=\\n#{1,3}\\s|$)`, 'i');
   const match = markdown.match(regex);
   return match ? match[1].trim().slice(0, 500) : null;
 }
 
-function extractBulletPoints(markdown: string, keyword: string): string[] | null {
+function extractBulletPoints(markdown, keyword) {
   const section = extractSection(markdown, keyword);
   if (!section) return null;
   const bullets = section
@@ -235,17 +216,7 @@ function extractBulletPoints(markdown: string, keyword: string): string[] | null
   return bullets.length > 0 ? bullets.slice(0, 5) : null;
 }
 
-function generateFallbackOfflineReport(
-  userPrompt: string,
-  docNames: string[],
-  evaluation: SufficiencyEvaluation,
-  hasWebSearch: boolean
-): {
-  markdownContent: string;
-  executiveSummary: string;
-  keyFindings: string[];
-  strategicRecommendations: string[];
-} {
+function generateFallbackOfflineReport(userPrompt, docNames, evaluation, hasWebSearch) {
   const now = new Date().toLocaleDateString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
@@ -255,8 +226,8 @@ function generateFallbackOfflineReport(
   const markdownContent = `# BÁO CÁO PHÂN TÍCH VÀ ĐỐI CHIẾU DỮ LIỆU ĐA TÀI LIỆU
 **Hệ thống:** Autonomous & Intelligent AI Report Engine  
 **Thời gian xử lý:** ${now}  
-**Trạng thái phân tích:** Hoàn tất thẩm định tự động (Độ tin cậy RAG: ${evaluation.confidenceScore}%)  
-**Tệp tài liệu nguồn:** ${docNames.join(' | ')}
+**Trạng thái phân tích:** Hoàn tất thẩm định tự động (Độ tin cậy RAG: ${evaluation?.confidenceScore || 70}%)  
+**Tệp tài liệu nguồn:** ${(docNames || []).join(' | ')}
 
 ---
 

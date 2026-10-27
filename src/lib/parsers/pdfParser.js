@@ -1,11 +1,6 @@
-import { DocumentChunk, DocumentMetadata } from '../types';
-import { chunkText } from './chunker';
+import { chunkText } from './chunker.js';
 
-export async function parsePdfBuffer(
-  buffer: Buffer,
-  docId: string,
-  fileName: string
-): Promise<{ metadata: DocumentMetadata; chunks: DocumentChunk[]; fullText: string }> {
+export async function parsePdfBuffer(buffer, docId, fileName) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const pdfModule = require('pdf-parse');
   const PDFParse = pdfModule.PDFParse || pdfModule.default?.PDFParse;
@@ -20,7 +15,7 @@ export async function parsePdfBuffer(
 
   const totalPages = parsed.total || parsed.pages?.length || 1;
   const fullText = parsed.text || '';
-  const chunks: DocumentChunk[] = [];
+  const chunks = [];
 
   if (Array.isArray(parsed.pages) && parsed.pages.length > 0) {
     for (const page of parsed.pages) {
@@ -38,7 +33,6 @@ export async function parsePdfBuffer(
       chunks.push(...pageChunks);
     }
   } else {
-    // Fallback if pages array is not present
     const generalChunks = chunkText(
       fullText,
       docId,
@@ -50,7 +44,6 @@ export async function parsePdfBuffer(
     chunks.push(...generalChunks);
   }
 
-  // Ensure unique chunk index
   chunks.forEach((chunk, idx) => {
     chunk.chunkIndex = idx;
     chunk.id = `${docId}-chunk-${idx}`;
@@ -58,7 +51,7 @@ export async function parsePdfBuffer(
 
   const wordCount = fullText.split(/\s+/).filter(Boolean).length;
 
-  const metadata: DocumentMetadata = {
+  const metadata = {
     id: docId,
     name: fileName,
     size: buffer.length,

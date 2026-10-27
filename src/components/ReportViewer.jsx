@@ -17,20 +17,12 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
-import { GeneratedReport } from '@/lib/types';
 
-interface ReportViewerProps {
-  report: GeneratedReport;
-  apiKey?: string;
-}
-
-export default function ReportViewer({ report, apiKey }: ReportViewerProps) {
-  const [activeTab, setActiveTab] = useState<'report' | 'sources' | 'chat'>('report');
+export default function ReportViewer({ report, apiKey }) {
+  const [activeTab, setActiveTab] = useState('report');
   const [copied, setCopied] = useState(false);
   const [chatQuestion, setChatQuestion] = useState('');
-  const [chatMessages, setChatMessages] = useState<
-    Array<{ sender: 'user' | 'assistant'; text: string; time: string }>
-  >([
+  const [chatMessages, setChatMessages] = useState([
     {
       sender: 'assistant',
       text: 'Xin chào! Bản báo cáo đã được AI Agent tổng hợp hoàn chỉnh từ các tài liệu PDF, Excel, Word và tìm kiếm trực tuyến Tavily. Bạn có thắc mắc hoặc cần làm rõ số liệu nào trong báo cáo không?',
@@ -38,6 +30,11 @@ export default function ReportViewer({ report, apiKey }: ReportViewerProps) {
     },
   ]);
   const [isAsking, setIsAsking] = useState(false);
+
+  if (!report) return null;
+
+  const ragSourcesUsed = report.ragSourcesUsed || [];
+  const webSourcesUsed = report.webSourcesUsed || [];
 
   const handleCopy = () => {
     navigator.clipboard.writeText(report.markdownContent);
@@ -61,7 +58,7 @@ export default function ReportViewer({ report, apiKey }: ReportViewerProps) {
     window.print();
   };
 
-  const handleSendChat = async (e: React.FormEvent) => {
+  const handleSendChat = async (e) => {
     e.preventDefault();
     if (!chatQuestion.trim() || isAsking) return;
 
@@ -135,7 +132,7 @@ export default function ReportViewer({ report, apiKey }: ReportViewerProps) {
             }`}
           >
             <Database className="w-3.5 h-3.5" />
-            Nguồn Thẩm Định ({report.ragSourcesUsed.length + report.webSourcesUsed.length})
+            Nguồn Thẩm Định ({ragSourcesUsed.length + webSourcesUsed.length})
           </button>
 
           <button
@@ -194,8 +191,8 @@ export default function ReportViewer({ report, apiKey }: ReportViewerProps) {
                 <span>Báo cáo hoàn chỉnh tạo bởi: <strong className="text-slate-200">Autonomous AI System</strong></span>
               </div>
               <div className="flex items-center gap-4">
-                <span>RAG nội bộ: <strong className="text-cyan-400">{report.ragSourcesUsed.length} đoạn trích</strong></span>
-                <span>Web Tavily: <strong className="text-indigo-400">{report.webSourcesUsed.length} nguồn liên kết</strong></span>
+                <span>RAG nội bộ: <strong className="text-cyan-400">{ragSourcesUsed.length} đoạn trích</strong></span>
+                <span>Web Tavily: <strong className="text-indigo-400">{webSourcesUsed.length} nguồn liên kết</strong></span>
                 <span>Ngày tạo: {new Date(report.createdAt).toLocaleDateString('vi-VN')}</span>
               </div>
             </div>
@@ -226,10 +223,10 @@ export default function ReportViewer({ report, apiKey }: ReportViewerProps) {
             <div className="space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
                 <Database className="w-3.5 h-3.5" />
-                Nguồn Tài Liệu Nội Bộ (RAG Chunks - {report.ragSourcesUsed.length})
+                Nguồn Tài Liệu Nội Bộ (RAG Chunks - {ragSourcesUsed.length})
               </h4>
               <div className="grid grid-cols-1 gap-3">
-                {report.ragSourcesUsed.map((src, idx) => (
+                {ragSourcesUsed.map((src, idx) => (
                   <div
                     key={idx}
                     className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs"
@@ -251,14 +248,14 @@ export default function ReportViewer({ report, apiKey }: ReportViewerProps) {
             </div>
 
             {/* Tavily Web Sources Section */}
-            {report.webSourcesUsed.length > 0 && (
+            {webSourcesUsed.length > 0 && (
               <div className="space-y-3 pt-4 border-t border-slate-800">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5" />
-                  Nguồn Nghiên Cứu Trực Tuyến (Tavily AI Web Search - {report.webSourcesUsed.length})
+                  Nguồn Nghiên Cứu Trực Tuyến (Tavily AI Web Search - {webSourcesUsed.length})
                 </h4>
                 <div className="grid grid-cols-1 gap-3">
-                  {report.webSourcesUsed.map((web, idx) => (
+                  {webSourcesUsed.map((web, idx) => (
                     <div
                       key={idx}
                       className="p-3.5 rounded-xl bg-slate-950 border border-indigo-950/60 hover:border-indigo-800/60 transition space-y-1.5 text-xs"

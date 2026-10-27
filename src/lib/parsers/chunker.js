@@ -1,27 +1,23 @@
-import { DocumentChunk, SupportedFileType } from '../types';
-
-export interface ChunkOptions {
-  chunkSize?: number;
-  chunkOverlap?: number;
-}
-
+/**
+ * Chia nhỏ văn bản thành các chunks có độ chồng lấp (overlap)
+ */
 export function chunkText(
-  text: string,
-  docId: string,
-  docName: string,
-  docType: SupportedFileType,
-  options: ChunkOptions = {},
-  defaultMetadata: { page?: number; sheet?: string; section?: string } = {}
-): DocumentChunk[] {
+  text,
+  docId,
+  docName,
+  docType,
+  options = {},
+  defaultMetadata = {}
+) {
   const chunkSize = options.chunkSize || 600;
   const chunkOverlap = options.chunkOverlap || 120;
 
-  const cleanText = text.replace(/\r\n/g, '\n').trim();
+  const cleanText = (text || '').replace(/\r\n/g, '\n').trim();
   if (!cleanText) return [];
 
-  // Split into paragraphs first
+  // Phân tách thành từng đoạn văn bản
   const paragraphs = cleanText.split(/\n\s*\n/);
-  const chunks: DocumentChunk[] = [];
+  const chunks = [];
   let currentBuffer = '';
   let chunkIndex = 0;
 
@@ -43,12 +39,10 @@ export function chunkText(
           metadata: { ...defaultMetadata },
         });
 
-        // Retain overlap from end of current buffer
         const overlapStart = Math.max(0, currentBuffer.length - chunkOverlap);
         const overlapText = currentBuffer.slice(overlapStart);
         currentBuffer = `${overlapText}\n\n${trimmed}`.slice(0, chunkSize);
       } else {
-        // Single paragraph larger than chunkSize, slice by sentences or characters
         let remaining = trimmed;
         while (remaining.length > 0) {
           const slice = remaining.slice(0, chunkSize);
