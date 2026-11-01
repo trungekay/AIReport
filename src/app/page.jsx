@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
-import SettingsModal from '@/components/SettingsModal';
 import DocumentUploader from '@/components/DocumentUploader';
 import AgentControlPanel from '@/components/AgentControlPanel';
 import AgentTraceViewer from '@/components/AgentTraceViewer';
@@ -18,44 +17,11 @@ export default function Home() {
   const [isUploading, setIsUploading] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isLoadingSample, setIsLoadingSample] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [tavilyApiKey, setTavilyApiKey] = useState('');
-  const [modelName, setModelName] = useState('gemini-2.5-flash');
 
   const [generatedReport, setGeneratedReport] = useState(null);
   const [liveSteps, setLiveSteps] = useState([]);
   const [liveEvaluation, setLiveEvaluation] = useState(undefined);
   const [notification, setNotification] = useState(null);
-
-  // Load API keys from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedGemini = localStorage.getItem('autointellect_gemini_key') || '';
-      const savedTavily = localStorage.getItem('autointellect_tavily_key') || '';
-      const savedModel = localStorage.getItem('autointellect_model') || 'gemini-2.5-flash';
-      setGeminiApiKey(savedGemini);
-      setTavilyApiKey(savedTavily);
-      setModelName(savedModel);
-    } catch {
-      // ignore localStorage errors in non-browser env
-    }
-  }, []);
-
-  const saveSettings = (geminiKey, tavilyKey, model) => {
-    setGeminiApiKey(geminiKey);
-    setTavilyApiKey(tavilyKey);
-    setModelName(model);
-    try {
-      localStorage.setItem('autointellect_gemini_key', geminiKey);
-      localStorage.setItem('autointellect_tavily_key', tavilyKey);
-      localStorage.setItem('autointellect_model', model);
-    } catch {
-      // ignore
-    }
-    showNotification('success', 'Đã lưu cấu hình API Keys thành công.');
-  };
 
   const showNotification = (type, message) => {
     setNotification({ type, message });
@@ -152,9 +118,6 @@ export default function Home() {
           request: {
             userPrompt,
             enableWebSearch,
-            geminiApiKey,
-            tavilyApiKey,
-            modelName,
           },
         }),
       });
@@ -207,64 +170,13 @@ export default function Home() {
 
       {/* Global Header */}
       <Header
-        onOpenSettings={() => setSettingsOpen(true)}
         onLoadSampleData={handleLoadSampleData}
         isLoadingSample={isLoadingSample}
-        hasApiKeys={Boolean(geminiApiKey && tavilyApiKey)}
         docCount={documents.length}
       />
 
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onSave={saveSettings}
-        initialGeminiKey={geminiApiKey}
-        initialTavilyKey={tavilyApiKey}
-        initialModel={modelName}
-      />
-
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-8">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 p-6 lg:p-8 shadow-2xl">
-          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-cyan-950/60 text-cyan-300 border border-cyan-800/60">
-                <Sparkles className="w-3.5 h-3.5" /> Kiến trúc Tác tử Tự hành Đa thể thức (Autonomous Multi-Modal Agent)
-              </div>
-              <h2 className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-snug">
-                Phân Tích & Đối Chiếu Báo Cáo Đa Tài Liệu Với{' '}
-                <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">
-                  RAG & Tavily Search
-                </span>
-              </h2>
-              <p className="text-xs lg:text-sm text-slate-300 leading-relaxed">
-                Đọc đồng thời tệp <strong>PDF</strong>, <strong>Word (.docx)</strong> và <strong>Excel (.xlsx)</strong>. 
-                Sử dụng Vector RAG để đối chiếu số liệu nội bộ; hệ thống AI tự kiểm tra tính đầy đủ (Self-Reflection), 
-                nếu thiếu dữ liệu sẽ tự động kích hoạt <strong>Tavily Search API</strong> để tìm kiếm Google, đối chuẩn thị trường và tạo ra bản báo cáo điều hành hoàn chỉnh.
-              </p>
-            </div>
-
-            {/* Quick Overview Badges */}
-            <div className="grid grid-cols-2 gap-3 shrink-0 text-xs">
-              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800/80">
-                <p className="text-slate-400 text-[11px]">Tài liệu hiện tại</p>
-                <p className="text-lg font-bold text-cyan-400 font-mono mt-0.5">{documents.length} tệp</p>
-                <p className="text-[10px] text-slate-500">PDF, Excel, Word</p>
-              </div>
-              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800/80">
-                <p className="text-slate-400 text-[11px]">Cơ chế tìm kiếm</p>
-                <p className="text-lg font-bold text-indigo-400 font-mono mt-0.5">Tavily AI</p>
-                <p className="text-[10px] text-slate-500">Google Search Live</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-6">
         {/* Workspace 2-Column Grid: Left (Doc Ingestion) & Right (Agent Control) */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column (5 Cols) */}
@@ -288,7 +200,6 @@ export default function Home() {
               onExecuteAgent={handleExecuteAgent}
               isExecuting={isExecuting}
               hasDocuments={documents.length > 0}
-              hasApiKeys={Boolean(geminiApiKey && tavilyApiKey)}
             />
           </div>
         </section>
@@ -311,7 +222,7 @@ export default function Home() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                 <h3 className="text-base font-bold text-white">
-                  3. Báo Cáo Phân Tích & Đối Chiếu Hoàn Chỉnh
+                  Báo Cáo Phân Tích & Đối Chiếu Dữ Liệu
                 </h3>
               </div>
               <span className="text-xs text-slate-400 font-mono">
@@ -319,20 +230,23 @@ export default function Home() {
               </span>
             </div>
 
-            <ReportViewer report={generatedReport} apiKey={geminiApiKey} />
+            <ReportViewer report={generatedReport} />
           </section>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/80 px-4 py-6 mt-12 text-center text-xs text-slate-400 no-print">
-        <p>
-          Dự án <strong className="text-slate-300">AutoIntellect AI</strong> • Topic:{' '}
-          <span className="text-cyan-400">Building Autonomous & Intelligent AI Systems</span>
-        </p>
-        <p className="text-[11px] text-slate-500 mt-1">
-          Đọc tài liệu đa định dạng (PDF, Word, Excel) • RAG Vector Search • Tự đánh giá lỗ hổng thông tin • Tự động kích hoạt Tavily Google Search
-        </p>
+      <footer className="border-t border-slate-800/80 bg-slate-950/80 px-4 py-5 mt-12 text-xs text-slate-500 no-print">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p>© 2025 <strong className="text-slate-300">NexusDoc Enterprise</strong>. Nền tảng phân tích và đối chiếu dữ liệu doanh nghiệp tự hành.</p>
+          <div className="flex items-center gap-3 text-[11px] text-slate-500">
+            <span>Bảo mật cấp doanh nghiệp</span>
+            <span>•</span>
+            <span>RAG Đa Định Dạng</span>
+            <span>•</span>
+            <span className="text-emerald-500 font-medium">Hệ thống Trực tuyến</span>
+          </div>
+        </div>
       </footer>
     </div>
   );

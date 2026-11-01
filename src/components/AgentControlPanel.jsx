@@ -20,7 +20,6 @@ export default function AgentControlPanel({
   onExecuteAgent,
   isExecuting,
   hasDocuments,
-  hasApiKeys,
 }) {
   const quickPrompts = [
     {
@@ -52,10 +51,10 @@ export default function AgentControlPanel({
       <div>
         <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
-          2. Yêu Cầu Phân Tích & Điều Khiển Tác Tử (AI Agent)
+          Yêu Cầu Phân Tích & Chỉ Thị Tác Tử AI
         </h2>
         <p className="text-xs text-slate-400">
-          Agent sẽ tự động phân rã yêu cầu, truy vấn RAG và kích hoạt Google Search qua Tavily nếu thiếu dữ liệu
+          Tác tử AI tự động lập kế hoạch truy xuất, đối chiếu chéo và tìm kiếm dữ liệu thị trường
         </p>
       </div>
 
@@ -126,13 +125,6 @@ export default function AgentControlPanel({
             <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
           </label>
         </div>
-
-        {!hasApiKeys && (
-          <p className="text-[11px] text-amber-400/90 flex items-center gap-1.5 pt-1 border-t border-slate-800/80">
-            <Sparkles className="w-3.5 h-3.5 shrink-0" />
-            Đang chạy chế độ mô phỏng AI Agent thông minh. Nhập API Keys để kết nối trực tiếp Gemini & Tavily live.
-          </p>
-        )}
       </div>
 
       {/* Launch CTA Button */}

@@ -34,7 +34,7 @@ Hãy trả về định dạng JSON với cấu trúc:
 Chỉ trả về JSON hợp lệ, không bọc markdown thừa.`;
 
   try {
-    const model = config.modelName || 'gemini-2.5-flash';
+    const model = config.modelName || 'gemini-3.1-flash-lite';
     const response = await client.models.generateContent({
       model,
       contents: prompt,
@@ -98,7 +98,7 @@ Trả về duy nhất JSON hợp lệ theo mẫu:
 }`;
 
   try {
-    const model = config.modelName || 'gemini-2.5-flash';
+    const model = config.modelName || 'gemini-3.1-flash-lite';
     const response = await client.models.generateContent({
       model,
       contents: prompt,
@@ -172,7 +172,7 @@ HƯỚNG DẪN VIẾT BÁO CÁO (Định dạng Markdown chuyên nghiệp):
 Hãy sử dụng văn phong quản trị cấp cao, sắc sảo, khách quan và giàu số liệu thực tế. Trả về toàn bộ nội dung báo cáo bằng Markdown chất lượng cao.`;
 
   try {
-    const model = config.modelName || 'gemini-2.5-flash';
+    const model = config.modelName || 'gemini-3.1-flash-lite';
     const response = await client.models.generateContent({
       model,
       contents: prompt,

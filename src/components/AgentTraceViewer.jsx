@@ -60,7 +60,7 @@ export default function AgentTraceViewer({
           </div>
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              Tiến Trình Suy Luận Tự Hành Của AI Agent (Autonomous Reasoning Trace)
+              Nhật Ký Thực Thi & Suy Luận Của Tác Tử (Execution Trace)
               {isExecuting && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-950 text-cyan-400 border border-cyan-800 animate-pulse">
                   Đang xử lý
@@ -68,7 +68,7 @@ export default function AgentTraceViewer({
               )}
             </h3>
             <p className="text-xs text-slate-400">
-              Quan sát trực quan các bước: Đánh chỉ mục RAG ➔ Tự đánh giá lỗ hổng ➔ Kích hoạt Tavily Search ➔ Đối chiếu đa tài liệu
+              Quy trình xử lý: Lập chỉ mục RAG ➔ Đánh giá độ đầy đủ thông tin ➔ Thu thập dữ liệu ngoài ➔ Tổng hợp đối chiếu đa nguồn
             </p>
           </div>
         </div>

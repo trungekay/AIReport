@@ -12,9 +12,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: 'AutoIntellect AI - Autonomous Document Synthesis & Research Agent',
+  title: 'NexusDoc Enterprise - Nền Tảng Phân Tích & Đối Chiếu Báo Cáo Doanh Nghiệp',
   description:
-    'Building Autonomous & Intelligent AI Systems: Multi-format document parser (PDF, Word, Excel), Vector RAG comparison, and Tavily Google Search augmentation for executive reports.',
+    'Hệ thống trí tuệ doanh nghiệp tự hành: Phân tích tài liệu đa định dạng (PDF, Word, Excel), đối chiếu chéo số liệu và tích hợp thông tin thị trường thời gian thực.',
 };
 
 export default function RootLayout({ children }) {
@@ -22,8 +22,14 @@ export default function RootLayout({ children }) {
     <html
       lang="vi"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-[#090d16] text-slate-100">{children}</body>
+      <body
+        className="min-h-full flex flex-col bg-[#090d16] text-slate-100"
+        suppressHydrationWarning
+      >
+        {children}
+      </body>
     </html>
   );
 }

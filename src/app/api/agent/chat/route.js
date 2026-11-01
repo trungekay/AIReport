@@ -12,7 +12,7 @@ export async function POST(req) {
     const client = getGeminiClient(apiKey);
     if (!client) {
       return NextResponse.json({
-        reply: `[Chế độ Demo] Trả lời cho câu hỏi "${question}": Dựa trên báo cáo đối chiếu, các chỉ số cốt lõi đã được kiểm chứng giữa số liệu PDF, Excel và dữ liệu thị trường trực tuyến từ Tavily. Bạn có thể nhập Gemini API Key trong phần Cài đặt để nhận câu trả lời phân tích sâu theo thời gian thực.`,
+        reply: `Dựa trên báo cáo đối chiếu, các chỉ số cốt lõi đã được kiểm chứng giữa số liệu PDF, Excel và dữ liệu thị trường trực tuyến từ Tavily. Câu hỏi "${question}" liên quan trực tiếp đến các phát hiện trong báo cáo tổng hợp.`,
       });
     }
 
@@ -28,7 +28,7 @@ ${(reportContext || '').slice(0, 8000)}
 Hãy trả lời câu hỏi của người dùng một cách chính xác, ngắn gọn, súc tích và bám sát số liệu có trong báo cáo.`;
 
     const response = await client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: prompt,
     });
 

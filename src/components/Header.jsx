@@ -1,13 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Cpu, Sparkles, Key, Database } from 'lucide-react';
+import { Cpu, Sparkles, Database } from 'lucide-react';
 
 export default function Header({
-  onOpenSettings,
   onLoadSampleData,
   isLoadingSample,
-  hasApiKeys,
   docCount,
 }) {
   return (
@@ -26,16 +24,13 @@ export default function Header({
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent tracking-tight">
-                AutoIntellect AI
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent tracking-tight">
+                NexusDoc Enterprise
               </h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 shadow-sm">
-                <Sparkles className="w-3 h-3" /> Autonomous Agent
-              </span>
             </div>
             <p className="text-xs text-slate-400 font-medium">
-              Topic: <span className="text-slate-300 font-semibold">Building Autonomous & Intelligent AI Systems</span> | Multi-Doc RAG + Tavily Web Search
+              Nền Tảng Trí Tuệ Doanh Nghiệp & Đối Chiếu Báo Cáo Tự Hành
             </p>
           </div>
         </div>
@@ -57,20 +52,6 @@ export default function Header({
               <span className="w-2 h-2 rounded-full bg-emerald-500" title="Excel"></span>
               <span className="w-2 h-2 rounded-full bg-blue-500" title="Word"></span>
             </div>
-          </button>
-
-          {/* API Keys Configuration */}
-          <button
-            type="button"
-            onClick={onOpenSettings}
-            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all duration-200 shadow-sm ${
-              hasApiKeys
-                ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60 hover:bg-emerald-900/50'
-                : 'bg-indigo-950/50 text-indigo-200 border-indigo-700/60 hover:bg-indigo-900/60 animate-pulse'
-            }`}
-          >
-            <Key className="w-3.5 h-3.5 text-indigo-400" />
-            <span>{hasApiKeys ? 'API Keys: Đã kết nối' : 'Cấu hình API Keys (Gemini & Tavily)'}</span>
           </button>
         </div>
       </div>

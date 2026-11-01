@@ -88,10 +88,10 @@ export default function DocumentUploader({
         <div>
           <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-            1. Tài Liệu Đầu Vào (PDF, Word, Excel)
+            Tài Liệu Nguồn & Dữ Liệu Doanh Nghiệp
           </h2>
           <p className="text-xs text-slate-400">
-            Hỗ trợ phân tích đa tài liệu và so sánh số liệu chéo bằng RAG
+            Nạp tệp đa định dạng (PDF, Word, Excel) để đối chiếu chéo số liệu
           </p>
         </div>
 

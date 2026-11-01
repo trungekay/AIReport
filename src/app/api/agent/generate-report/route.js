@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { runAutonomousAgent } from '@/lib/agent/autonomousAgent.js';
 
-export const maxDuration = 120; // Allow sufficient time for LLM + Tavily
-
 export async function POST(req) {
   try {
     const body = await req.json();
